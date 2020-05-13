@@ -4,21 +4,27 @@ from bs4 import BeautifulSoup
 from django.shortcuts import render, redirect
 from requests.compat import quote_plus
 
+from .forms import SearchForm
 from .models import Search
 
-BASE_SEARCH_URL = "https://losangeles.craigslist.org/search/sss?query={}"
+BASE_SEARCH_URL = "https://losangeles.craigslist.org/search/?query={}"
 BASE_IMG_URL = "https://images.craigslist.org/{}_300x300.jpg"
 
 # Create your views here.
 def index(request):
-    return render(request, 'radzlist/base.html')
+    form = SearchForm()
+    frontend = {'form': form}
+    return render(request, 'radzlist/base.html', frontend)
 
 
 def search(request):
     if request.method == 'POST':
-        search = request.POST.get('search')
-        Search.objects.create(search=search)
-        final_url = BASE_SEARCH_URL.format(quote_plus(search))
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            search = form.save(commit=False)
+            search.save()
+
+        final_url = BASE_SEARCH_URL.format(quote_plus(form.cleaned_data['search']))
         
         response = requests.get(final_url)
         data = response.text
@@ -46,11 +52,14 @@ def search(request):
 
             final_posts.append((post_title, post_link, post_price, post_image))
 
+        form = SearchForm()
+
         frontend = {
+            'form':form,
             'search': search,
             'final_posts': final_posts,
         }
 
         return render(request, 'radzlist/search.html', frontend)
     else:
-        return redirect('/')
+        return redirect('index')
