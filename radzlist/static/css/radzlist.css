@@ -1,0 +1,27 @@
+.brand-logo {
+    margin-left: 20px;
+}
+
+#icon-container {
+    margin-top: 50px;
+}
+
+#flash-on {
+    color: #d32f2f;
+}
+
+#camera {
+    color: orange;
+}
+
+#web {
+    color: blue;
+}
+
+#hearts {
+    color: #d32f2f;
+}
+
+#form-container {
+    padding: 20px;
+}
