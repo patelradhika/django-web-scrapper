@@ -1,6 +1,7 @@
 import requests
 
 from bs4 import BeautifulSoup
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from requests.compat import quote_plus
 
@@ -17,14 +18,23 @@ def index(request):
     return render(request, 'radzlist/base.html', frontend)
 
 
+def searches(request):
+    searches = Search.objects.all()
+    list_searches = [s.as_dict() for s in searches]
+    return JsonResponse(list_searches, safe=False)
+
+
 def search(request):
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
-            search = form.save(commit=False)
-            search.save()
+            search = form.cleaned_data['search']
+            
+            if not Search.objects.filter(search=search):
+                new_search = form.save(commit=False)
+                new_search.save()
 
-        final_url = BASE_SEARCH_URL.format(quote_plus(form.cleaned_data['search']))
+        final_url = BASE_SEARCH_URL.format(quote_plus(search))
         
         response = requests.get(final_url)
         data = response.text

@@ -11,5 +11,8 @@ class Search(models.Model):
     def __str__(self):
         return self.search
 
+    def as_dict(self):
+        return {'search': self.search}
+
     class Meta:
         verbose_name_plural = 'Searches'
